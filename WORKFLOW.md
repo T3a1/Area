@@ -50,7 +50,7 @@ Once per repo (David, task P02/P21):
 - Run `scripts/setup-labels.sh`.
 - Fill in `.github/board.env` (owner and number of the GitHub Project).
 - Protect `main`: require a PR, 1 approval, review from Code Owners, CI green.
-- Add the `TEAMS_WEBHOOK_URL` repository secret (URL of the Teams Workflows flow "When a webhook request is received", trigger "Anyone").
+- Add the `TEAMS_WEBHOOK_URL` repository secret (URL of the Teams Workflows template "Send webhook alerts from anyone to a channel").
 
 ## Daily loop
 

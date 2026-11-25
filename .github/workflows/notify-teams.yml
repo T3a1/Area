@@ -1,6 +1,5 @@
 # Posts to Microsoft Teams ONLY when a human is needed. Requires repo secret TEAMS_WEBHOOK_URL.
-# Teams side: a Workflows flow "When a webhook request is received" (trigger: Anyone)
-# → "Send a message in a chat or channel" with Message body = triggerBody()?['text'].
+# Teams side: channel → Workflows → template "Send webhook alerts from anyone to a channel"; its URL goes in the secret.
 # If the secret is missing, the job does nothing.
 name: Notify humans
 
@@ -35,12 +34,25 @@ jobs:
         run: |
           [ -z "$WEBHOOK" ] && { echo "No webhook configured, skipping."; exit 0; }
           case "$ACTION" in
-            review_requested)  MSG="👀 <b>Review requested</b> from $REVIEWER" ;;
-            ready_for_review)  MSG="📬 <b>PR ready for review</b>" ;;
-            opened)            MSG="📨 <b>New request</b> for ${ASSIGNEES:-unassigned}" ;;
-            labeled)           MSG="🏷️ <b>$LABEL</b>" ;;
+            review_requested)  MSG="👀 Review requested from $REVIEWER" ;;
+            ready_for_review)  MSG="📬 PR ready for review" ;;
+            opened)            MSG="📨 New request for ${ASSIGNEES:-unassigned}" ;;
+            labeled)           MSG="🏷️ Label: $LABEL" ;;
           esac
-          jq -n --arg msg "$MSG" --arg title "$TITLE" --arg url "$URL" '
-            def esc: gsub("&"; "&amp;") | gsub("<"; "&lt;") | gsub(">"; "&gt;");
-            { text: "\($msg): <a href=\"\($url)\">\($title | esc)</a>" }' \
-            | curl -fsS -H 'Content-Type: application/json' -d @- "$WEBHOOK"
+          jq -n --arg msg "$MSG" --arg title "$TITLE" --arg url "$URL" '{
+            type: "message",
+            attachments: [{
+              contentType: "application/vnd.microsoft.card.adaptive",
+              contentUrl: null,
+              content: {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                type: "AdaptiveCard",
+                version: "1.4",
+                body: [
+                  { type: "TextBlock", text: $msg, weight: "Bolder", wrap: true },
+                  { type: "TextBlock", text: $title, wrap: true }
+                ],
+                actions: [{ type: "Action.OpenUrl", title: "Open on GitHub", url: $url }]
+              }
+            }]
+          }' | curl -fsS -H 'Content-Type: application/json' -d @- "$WEBHOOK"
