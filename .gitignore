@@ -1,0 +1,40 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+*.jks
+
+# Node / web
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+
+# .NET / Python (spikes)
+bin/
+obj/
+__pycache__/
+.venv/
+
+# Android / Kotlin
+.gradle/
+local.properties
+*.apk
+*.aab
+captures/
+.idea/
+*.iml
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Personal Claude config (each teammate has their own role)
+CLAUDE.local.md
+.claude/settings.local.json
+.worktrees/
