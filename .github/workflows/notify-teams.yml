@@ -14,13 +14,16 @@ permissions: {}
 jobs:
   notify:
     runs-on: ubuntu-latest
+    # Only on the mirror: this file is forwarded to the Epitech repo, where Actions can't run.
     if: >-
-      github.event.action == 'review_requested' ||
-      github.event.action == 'ready_for_review' ||
-      (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'request')) ||
-      github.event.label.name == 'needs-approval' ||
-      github.event.label.name == 'blocked' ||
-      github.event.label.name == 'contract'
+      github.repository == 'T3a1/Area' && (
+        github.event.action == 'review_requested' ||
+        github.event.action == 'ready_for_review' ||
+        (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'request')) ||
+        github.event.label.name == 'needs-approval' ||
+        github.event.label.name == 'blocked' ||
+        github.event.label.name == 'contract'
+      )
     steps:
       - name: Send to Teams
         env:

@@ -22,6 +22,14 @@ Why this shape: each Claude keeps only its own context (one issue, its folders, 
 and anything another Claude must know is written where that Claude will look: an issue
 assigned to its human, or a review request.
 
+## Repositories
+
+- **Work happens on the public mirror [`T3a1/Area`](https://github.com/T3a1/Area)**: branches, PRs,
+  issues, board and GitHub Actions (free there). Clone it with `git clone git@github.com:T3a1/Area.git`.
+- The Epitech repo `EpitechPGE3-2026/G-YEP-500-LIL-5-1-area-15` is a copy: `.github/workflows/forward.yml`
+  pushes every branch and tag to it. **Never push to the Epitech repo directly**: the next forward
+  overwrites it.
+
 ## One-time setup (each teammate)
 
 1. Install Claude Code and the GitHub CLI, then give `gh` access to Projects:
@@ -29,7 +37,7 @@ assigned to its human, or a review request.
    gh auth login
    gh auth refresh -s project
    ```
-2. Clone the repo and create your personal file (never committed):
+2. Clone the mirror (see above) and create your personal file (never committed):
    ```bash
    # Léandre
    printf '@docs/roles/server.md\n@docs/roles/architect.md\n' > CLAUDE.local.md
