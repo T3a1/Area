@@ -1,4 +1,6 @@
-# Posts to Discord ONLY when a human is needed. Requires repo secret DISCORD_WEBHOOK_URL.
+# Posts to Microsoft Teams ONLY when a human is needed. Requires repo secret TEAMS_WEBHOOK_URL.
+# Teams side: a Workflows flow "When a webhook request is received" (trigger: Anyone)
+# → "Send a message in a chat or channel" with Message body = triggerBody()?['text'].
 # If the secret is missing, the job does nothing.
 name: Notify humans
 
@@ -21,9 +23,9 @@ jobs:
       github.event.label.name == 'blocked' ||
       github.event.label.name == 'contract'
     steps:
-      - name: Send to Discord
+      - name: Send to Teams
         env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
           TITLE: ${{ github.event.pull_request.title || github.event.issue.title }}
           URL: ${{ github.event.pull_request.html_url || github.event.issue.html_url }}
           ACTION: ${{ github.event.action }}
@@ -33,10 +35,12 @@ jobs:
         run: |
           [ -z "$WEBHOOK" ] && { echo "No webhook configured, skipping."; exit 0; }
           case "$ACTION" in
-            review_requested)  MSG="👀 Review requested from **$REVIEWER**" ;;
-            ready_for_review)  MSG="📬 PR ready for review" ;;
-            opened)            MSG="📨 New request for **${ASSIGNEES:-unassigned}**" ;;
-            labeled)           MSG="🏷️ \`$LABEL\`" ;;
+            review_requested)  MSG="👀 <b>Review requested</b> from $REVIEWER" ;;
+            ready_for_review)  MSG="📬 <b>PR ready for review</b>" ;;
+            opened)            MSG="📨 <b>New request</b> for ${ASSIGNEES:-unassigned}" ;;
+            labeled)           MSG="🏷️ <b>$LABEL</b>" ;;
           esac
-          jq -n --arg c "$MSG: [$TITLE]($URL)" '{content: $c, allowed_mentions: {parse: []}}' \
-            | curl -sS -H 'Content-Type: application/json' -d @- "$WEBHOOK"
+          jq -n --arg msg "$MSG" --arg title "$TITLE" --arg url "$URL" '
+            def esc: gsub("&"; "&amp;") | gsub("<"; "&lt;") | gsub(">"; "&gt;");
+            { text: "\($msg): <a href=\"\($url)\">\($title | esc)</a>" }' \
+            | curl -fsS -H 'Content-Type: application/json' -d @- "$WEBHOOK"

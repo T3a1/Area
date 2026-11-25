@@ -50,7 +50,7 @@ Once per repo (David, task P02/P21):
 - Run `scripts/setup-labels.sh`.
 - Fill in `.github/board.env` (owner and number of the GitHub Project).
 - Protect `main`: require a PR, 1 approval, review from Code Owners, CI green.
-- Add the `DISCORD_WEBHOOK_URL` repository secret for notifications.
+- Add the `TEAMS_WEBHOOK_URL` repository secret (URL of the Teams Workflows flow "When a webhook request is received", trigger "Anyone").
 
 ## Daily loop
 
@@ -123,8 +123,8 @@ P22 (28/11), Phase 3 at F01.
 ## Notifications
 
 - GitHub (web or mobile app): review requests, assignments and mentions.
-- Discord: `.github/workflows/notify-discord.yml` posts **only** when a human is needed
-  (new request, review requested, `blocked`, `needs-approval`). Agent chatter never goes to Discord.
+- Teams: `.github/workflows/notify-teams.yml` posts **only** when a human is needed
+  (new request, review requested, `blocked`, `needs-approval`). Agent chatter never goes to Teams.
 
 ## Making limits last
 
