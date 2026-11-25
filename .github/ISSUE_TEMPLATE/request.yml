@@ -1,0 +1,34 @@
+name: Request to another area
+description: Ask another area for something you need (endpoint, field, fix, contract change)
+labels: ["request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Assign the owner of the area (see `.github/CODEOWNERS`) and add its `area:*` label.
+        Changes to the OpenAPI, DB schema, workflow format or `about.json` also get `contract` and go to the architect.
+  - type: textarea
+    id: needed
+    attributes:
+      label: Needed
+      description: What must exist or change, seen from your side (inputs, outputs, example payload). Not how to build it.
+    validations:
+      required: true
+  - type: input
+    id: waiting
+    attributes:
+      label: Waiting task
+      description: Your issue and WBS id that wait for this
+      placeholder: "#31 (M19)"
+    validations:
+      required: true
+  - type: input
+    id: by
+    attributes:
+      label: Needed by
+      placeholder: "06/12"
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal (optional)
+      description: A suggestion the owner is free to ignore.

@@ -1,0 +1,61 @@
+# Posts to Microsoft Teams ONLY when a human is needed. Requires repo secret TEAMS_WEBHOOK_URL.
+# Teams side: channel → Workflows → template "Send webhook alerts from anyone to a channel"; its URL goes in the secret.
+# If the secret is missing, the job does nothing.
+name: Notify humans
+
+on:
+  pull_request:
+    types: [review_requested, labeled, ready_for_review]
+  issues:
+    types: [opened, labeled]
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    # Only on the mirror: this file is forwarded to the Epitech repo, where Actions can't run.
+    if: >-
+      github.repository == 'T3a1/Area' && (
+        github.event.action == 'review_requested' ||
+        github.event.action == 'ready_for_review' ||
+        (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'request')) ||
+        github.event.label.name == 'needs-approval' ||
+        github.event.label.name == 'blocked' ||
+        github.event.label.name == 'contract'
+      )
+    steps:
+      - name: Send to Teams
+        env:
+          WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          TITLE: ${{ github.event.pull_request.title || github.event.issue.title }}
+          URL: ${{ github.event.pull_request.html_url || github.event.issue.html_url }}
+          ACTION: ${{ github.event.action }}
+          LABEL: ${{ github.event.label.name }}
+          REVIEWER: ${{ github.event.requested_reviewer.login }}
+          ASSIGNEES: ${{ join(github.event.issue.assignees.*.login, ', ') }}
+        run: |
+          [ -z "$WEBHOOK" ] && { echo "No webhook configured, skipping."; exit 0; }
+          case "$ACTION" in
+            review_requested)  MSG="👀 Review requested from $REVIEWER" ;;
+            ready_for_review)  MSG="📬 PR ready for review" ;;
+            opened)            MSG="📨 New request for ${ASSIGNEES:-unassigned}" ;;
+            labeled)           MSG="🏷️ Label: $LABEL" ;;
+          esac
+          jq -n --arg msg "$MSG" --arg title "$TITLE" --arg url "$URL" '{
+            type: "message",
+            attachments: [{
+              contentType: "application/vnd.microsoft.card.adaptive",
+              contentUrl: null,
+              content: {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                type: "AdaptiveCard",
+                version: "1.4",
+                body: [
+                  { type: "TextBlock", text: $msg, weight: "Bolder", wrap: true },
+                  { type: "TextBlock", text: $title, wrap: true }
+                ],
+                actions: [{ type: "Action.OpenUrl", title: "Open on GitHub", url: $url }]
+              }
+            }]
+          }' | curl -fsS -H 'Content-Type: application/json' -d @- "$WEBHOOK"

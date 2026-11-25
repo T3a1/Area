@@ -1,0 +1,18 @@
+name: Decision needed
+description: A technical choice the team must make (becomes an ADR)
+labels: ["decision", "needs-approval", "area:docs"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: What must be decided?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why now? Which tasks does it block?
+  - type: textarea
+    id: options
+    attributes:
+      label: Options known so far
