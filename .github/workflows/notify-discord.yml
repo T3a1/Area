@@ -1,0 +1,42 @@
+# Posts to Discord ONLY when a human is needed. Requires repo secret DISCORD_WEBHOOK_URL.
+# If the secret is missing, the job does nothing.
+name: Notify humans
+
+on:
+  pull_request:
+    types: [review_requested, labeled, ready_for_review]
+  issues:
+    types: [opened, labeled]
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.action == 'review_requested' ||
+      github.event.action == 'ready_for_review' ||
+      (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'request')) ||
+      github.event.label.name == 'needs-approval' ||
+      github.event.label.name == 'blocked' ||
+      github.event.label.name == 'contract'
+    steps:
+      - name: Send to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TITLE: ${{ github.event.pull_request.title || github.event.issue.title }}
+          URL: ${{ github.event.pull_request.html_url || github.event.issue.html_url }}
+          ACTION: ${{ github.event.action }}
+          LABEL: ${{ github.event.label.name }}
+          REVIEWER: ${{ github.event.requested_reviewer.login }}
+          ASSIGNEES: ${{ join(github.event.issue.assignees.*.login, ', ') }}
+        run: |
+          [ -z "$WEBHOOK" ] && { echo "No webhook configured, skipping."; exit 0; }
+          case "$ACTION" in
+            review_requested)  MSG="👀 Review requested from **$REVIEWER**" ;;
+            ready_for_review)  MSG="📬 PR ready for review" ;;
+            opened)            MSG="📨 New request for **${ASSIGNEES:-unassigned}**" ;;
+            labeled)           MSG="🏷️ \`$LABEL\`" ;;
+          esac
+          jq -n --arg c "$MSG: [$TITLE]($URL)" '{content: $c, allowed_mentions: {parse: []}}' \
+            | curl -sS -H 'Content-Type: application/json' -d @- "$WEBHOOK"

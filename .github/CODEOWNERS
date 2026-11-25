@@ -1,0 +1,33 @@
+# Who must review changes in each area. The last matching line wins.
+# TODO (each teammate): replace your placeholder with your GitHub login (@ROMANE, @THOMAS, @DAVID),
+# then enable "Require review from Code Owners" in the branch protection of `main`.
+
+*                              @T3a1
+
+# Server: engine, hooks, registry (Léandre); auth & OAuth modules (David)
+/server/                       @T3a1
+/server/**/auth/               @DAVID
+/server/**/oauth/              @DAVID
+
+# Shared contracts: Léandre + every consumer
+/server/**/openapi*            @T3a1 @ROMANE @THOMAS @DAVID
+/server/**/migrations/         @T3a1 @DAVID
+
+# Clients
+/web/                          @ROMANE
+/mobile/                       @THOMAS
+
+# Infrastructure
+/.github/                      @DAVID
+/docker-compose*.yml           @DAVID
+**/Dockerfile                  @DAVID
+/.env.example                  @DAVID
+
+# Plan, decisions, team rules
+/docs/                         @T3a1 @ROMANE @THOMAS @DAVID
+/docs/plan/project-management* @DAVID
+/planning/                     @T3a1
+/CLAUDE.md                     @T3a1 @ROMANE @THOMAS @DAVID
+/WORKFLOW.md                   @T3a1 @ROMANE @THOMAS @DAVID
+/.claude/                      @T3a1
+/.github/CODEOWNERS            @T3a1 @DAVID

@@ -1,0 +1,48 @@
+name: Task
+description: One WBS task (≤ 1 day), owned by one person
+body:
+  - type: input
+    id: wbs
+    attributes:
+      label: WBS id
+      description: From planning/project-wbs.md, e.g. M12
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should exist or work when this is done? One or two sentences.
+    validations:
+      required: true
+  - type: input
+    id: scope
+    attributes:
+      label: Folders allowed
+      description: Only these may be modified, e.g. `server/src/hooks/, docs/adr/`
+    validations:
+      required: true
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Acceptance criteria
+      description: Checkable items. The reviewer verifies each one.
+      value: |
+        - [ ]
+        - [ ] Tests added and passing
+    validations:
+      required: true
+  - type: input
+    id: deps
+    attributes:
+      label: Depends on
+      placeholder: "#12, #14"
+  - type: input
+    id: adrs
+    attributes:
+      label: Related ADRs
+      placeholder: "ADR-0002, ADR-0003"
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / references
